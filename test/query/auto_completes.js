@@ -1,12 +1,28 @@
 import v from '../voca';
 
-// auto_completes takes an array of search results and a prefix search term and returns
+// TODO: Add autoCompletes function the the "query" family of functions
+// auto_completes takes an array of terms and a prefix search term and returns
 // an array of possible autocomplete results.
+
 // If there are exact prefix matches, return those.
-// If there are no exact prefix matches, switch to fuzzy mode
+// If there are no exact prefix matches, switch to fuzzy prefix mode
+
+// Fuzzy prefix mode is similar to exact prefix mode but returns a result even if it
+// contains a 1 character *substitution*
+
+// Fuzzy matches:
+// . - Zen : Zel
+// . - Zen : gen
+
+// Not fuzzy matches:
+//   - Zen : Ze (length mismatch)
+// . - Zen : Zom (2 substitutions)
+
 describe('auto_completes', () => {
   it('returns null on empty search array', () => {
     expect(v.autoCompletes([], "searchterm")).toEqual(null);
+    expect(v.autoCompletes([''], "searchterm")).toEqual(null);
+    expect(v.autoCompletes([' '], "searchterm")).toEqual(null);
   });
 
   it('returns null on empty search term', () => {
@@ -38,8 +54,8 @@ describe('auto_completes', () => {
     ];
 
     it ('exact matches', () => {
-      expect(v.autoCompletes(searchTerms, 'not')).toEqual([]);
-      expect(v.autoCompletes(searchTerms, 'n')).sort().toEqual([
+      expect(v.autoCompletes(searchTerms, 'nug')).toEqual([]);
+      expect(v.autoCompletes(searchTerms, 'n').sort()).toEqual([
         'Nebraska',
         'New Jersey',
         'New Mexico',
@@ -47,25 +63,30 @@ describe('auto_completes', () => {
         'North Carolina',
         'North Dakota',
       ]);
-      expect(v.autoCompletes(searchTerms, 'ne')).sort().toEqual([
+      expect(v.autoCompletes(searchTerms, 'ne').sort()).toEqual([
         'Nebraska',
         'New Jersey',
         'New Mexico',
         'New York',
       ]);
-      expect(v.autoCompletes(searchTerms, 'neb')).sort().toEqual([
+      expect(v.autoCompletes(searchTerms, 'neb').sort()).toEqual([
         'Nebraska',
       ]);
     });
 
-    // if there are no results, autoCompletes switches to fuzzy match mode
-    // This looks for any substring
     it ('fuzzy matches', () => {
       expect(v.autoCompletes(searchTerms, 'r')).toEqual([]);
       expect(v.autoCompletes(searchTerms, 're')).toEqual([]);
-      expect(v.autoCompletes(searchTerms, 'ren')).sort().toEqual([
+      expect(v.autoCompletes(searchTerms, 'jen').sort()).toEqual([
         'Kentucky',
         'Tennessee',
+      ]);
+      expect(v.autoCompletes(searchTerms, 'now').sort()).toEqual([
+        'New Jersey',
+        'New Mexico',
+        'New York',
+        'North Carolina',
+        'North Dakota',
       ]);
     });
   });
