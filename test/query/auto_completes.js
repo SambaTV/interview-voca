@@ -11,18 +11,20 @@ import v from '../voca';
 // contains a 1 character *substitution*
 
 // Fuzzy matches:
+// (search) : (target)
 // . - Zen : Zel
 // . - Zen : gen
+// . - Zen : Denver (1 substitution)
 
 // Not fuzzy matches:
-//   - Zen : Ze (length mismatch)
+//   - Zen : Ze (target is too short)
 // . - Zen : Zom (2 substitutions)
 
 describe('auto_completes', () => {
   it('returns null on empty search array', () => {
-    expect(v.autoCompletes([], "searchterm")).toEqual(null);
-    expect(v.autoCompletes([''], "searchterm")).toEqual(null);
-    expect(v.autoCompletes([' '], "searchterm")).toEqual(null);
+    expect(v.autoCompletes([], 'searchterm')).toEqual(null);
+    expect(v.autoCompletes([''], 'searchterm')).toEqual(null);
+    expect(v.autoCompletes([' '], 'searchterm')).toEqual(null);
   });
 
   it('returns null on empty search term', () => {
@@ -30,7 +32,7 @@ describe('auto_completes', () => {
     expect(v.autoCompletes(['term1'], '')).toEqual(null);
   });
 
-  it ('returns correct answer with 1 search term', () => {
+  it('returns correct answer with 1 search term', () => {
     expect(v.autoCompletes(['term1'], 't')).toEqual(['term1']);
     expect(v.autoCompletes(['term1'], 'te')).toEqual(['term1']);
     expect(v.autoCompletes(['term1'], 'ter')).toEqual(['term1']);
@@ -38,10 +40,9 @@ describe('auto_completes', () => {
 
     expect(v.autoCompletes(['term1'], ' ter')).toEqual(['term1']);
     expect(v.autoCompletes(['term1'], 'ter ')).toEqual(['term1']);
-
   });
 
-  describe ('returns correct answer with multiple search terms', () => {
+  describe('returns correct answer with multiple search terms', () => {
     const searchTerms = [
       'Kentucky',
       'North Dakota',
@@ -53,7 +54,7 @@ describe('auto_completes', () => {
       'Tennessee',
     ];
 
-    it ('exact matches', () => {
+    it('exact matches', () => {
       expect(v.autoCompletes(searchTerms, 'nug')).toEqual([]);
       expect(v.autoCompletes(searchTerms, 'n').sort()).toEqual([
         'Nebraska',
@@ -63,24 +64,14 @@ describe('auto_completes', () => {
         'North Carolina',
         'North Dakota',
       ]);
-      expect(v.autoCompletes(searchTerms, 'ne').sort()).toEqual([
-        'Nebraska',
-        'New Jersey',
-        'New Mexico',
-        'New York',
-      ]);
-      expect(v.autoCompletes(searchTerms, 'neb').sort()).toEqual([
-        'Nebraska',
-      ]);
+      expect(v.autoCompletes(searchTerms, 'ne').sort()).toEqual(['Nebraska', 'New Jersey', 'New Mexico', 'New York']);
+      expect(v.autoCompletes(searchTerms, 'neb').sort()).toEqual(['Nebraska']);
     });
 
-    it ('fuzzy matches', () => {
+    it('fuzzy matches', () => {
       expect(v.autoCompletes(searchTerms, 'r')).toEqual([]);
       expect(v.autoCompletes(searchTerms, 're')).toEqual([]);
-      expect(v.autoCompletes(searchTerms, 'jen').sort()).toEqual([
-        'Kentucky',
-        'Tennessee',
-      ]);
+      expect(v.autoCompletes(searchTerms, 'jen').sort()).toEqual(['Kentucky', 'Tennessee']);
       expect(v.autoCompletes(searchTerms, 'now').sort()).toEqual([
         'New Jersey',
         'New Mexico',
